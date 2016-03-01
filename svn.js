@@ -204,6 +204,14 @@ function patch(file, wc, options, cb) {
   return _execSVN('patch', [file, wc], options, cb);
 }
 
+function propget(path, prop, options, cb) {
+  return _execSVNOptionsLast('propget', [prop, path], options, cb);
+}
+
+function propset(prop, value, options, cb) {
+  return _execSVNOptionsLast('propset', [prop, value], options, cb);
+}
+
 function revert (files, options, cb) {
   return _execSVN('revert', files, options, cb);
 }
@@ -229,6 +237,23 @@ function _execSVN(cmd, files, options, cb) {
   args.unshift(cmd);
   //args.push(files);
   args = args.concat(files);
+  return _process(args, cb);
+}
+
+function _execSVNOptionsLast(cmd, files, options, cb) {
+  if(typeof options === 'function') {
+    cb = options; options = {};
+  }
+  cb = (!cb) ? function empty() {} : cb;
+  options = (!options) ? {} : options;
+  files = _fixFiles(files, options);
+  delete options.cwd;
+  //files = files.join(" ");
+  var optionArgs = _getArgs(options);
+  //args.push(files);
+  var args = files;
+  args.unshift(cmd);
+  args = args.concat(optionArgs);
   return _process(args, cb);
 }
 
@@ -336,9 +361,9 @@ var svn = { // Long names
   patch: patch,
   propdel: NOTDONE,
   propedit: NOTDONE,
-  propget: NOTDONE,
+  propget: propget,
   proplist: NOTDONE,
-  propset: NOTDONE,
+  propset: propset,
   relocate: NOTDONE,
   resolve: resolve,
   resolved: NOTDONE,
